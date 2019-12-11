@@ -1,61 +1,55 @@
-import React from 'react';
-
+import React from "react";
 
 class Appp extends React.Component {
   constructor(props) {
     super(props);
-    this.fileReader = null
-    this.state = {filecontent:[]}
+    this.fileReader = null;
+    this.state = { filecontent: [] };
   }
 
-
-  handleFileRead = e => {
-    const typedArray = new Uint8Array(this.fileReader.result)
+  handleFileRead = () => {
+    const typedArray = new Uint8Array(this.fileReader.result);
     const untypedArrray = [];
     const iii = typedArray.values();
 
-
-
-
     while (true) {
+      const { value, done } = iii.next();
 
-      const { value, done } = iii.next()
-      if (done){
-        break
+      if (done) {
+        break;
       }
 
-      const hexValue = value.toString(16)
+      const hexValue = value.toString(16);
 
-      untypedArrray.push(hexValue.length === 1 ? `0${hexValue}`: hexValue)
-
-
+      untypedArrray.push(hexValue.length === 1 ? `0${hexValue}` : hexValue);
     }
 
     this.setState({
-      filecontent:untypedArrray,
+      filecontent: untypedArrray
     });
-  }
-
-
+  };
 
   handleFileChosen = file => {
-    this.fileReader = new FileReader()
+    this.fileReader = new FileReader();
     this.fileReader.onloadend = this.handleFileRead;
     this.fileReader.readAsArrayBuffer(file);
-  }
-
+  };
 
   render() {
-    console.log(this.state.filecontent.map(each=> each.toString()))
-    return <div>
-      <input type={"file"} id={"file"} accept={".bin"} onChange={e => this.handleFileChosen(e.target.files[0])}/>
-      <br/>
-      {this.state.filecontent.map(each=> `${each} `)}
-
-    </div>
+    console.log(this.state.filecontent.map(each => each.toString()));
+    return (
+      <div>
+        <input
+          type={"file"}
+          id={"file"}
+          accept={".bin"}
+          onChange={e => this.handleFileChosen(e.target.files[0])}
+        />
+        <br />
+        {this.state.filecontent.map(each => `${each} `)}
+      </div>
+    );
   }
 }
-
-
 
 export default Appp;
