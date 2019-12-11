@@ -1,21 +1,15 @@
 import React from 'react';
 
-import './App.css';
 
 class Appp extends React.Component {
-
-
   constructor(props) {
     super(props);
     this.fileReader = null
     this.state = {filecontent:[]}
-
   }
 
 
   handleFileRead = e => {
-
-
     const typedArray = new Uint8Array(this.fileReader.result)
     const untypedArrray = [];
     const iii = typedArray.values();
@@ -40,8 +34,6 @@ class Appp extends React.Component {
     this.setState({
       filecontent:untypedArrray,
     });
-
-
   }
 
 
@@ -55,7 +47,6 @@ class Appp extends React.Component {
 
   render() {
     console.log(this.state.filecontent.map(each=> each.toString()))
-
     return <div>
       <input type={"file"} id={"file"} accept={".bin"} onChange={e => this.handleFileChosen(e.target.files[0])}/>
       <br/>
