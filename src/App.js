@@ -1,6 +1,10 @@
 import React from "react";
 
-class Appp extends React.Component {
+function HexDecoder() {
+  return <div></div>;
+}
+
+class App extends React.Component {
   constructor(props) {
     super(props);
     this.fileReader = null;
@@ -46,10 +50,19 @@ class Appp extends React.Component {
           onChange={e => this.handleFileChosen(e.target.files[0])}
         />
         <br />
+
+        {this.state.filecontent.length > 0 && (
+          <div>No Bytes present {this.state.filecontent.length}</div>
+        )}
+
         {this.state.filecontent.map(each => `${each} `)}
+
+        {this.state.filecontent.length > 0 && (
+          <button>Add Decoding Section</button>
+        )}
       </div>
     );
   }
 }
 
-export default Appp;
+export default App;
