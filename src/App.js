@@ -1,15 +1,28 @@
 import React from "react";
-
-function HexDecoder() {
-  return <div></div>;
-}
+import { Button, Input } from "antd";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.fileReader = null;
-    this.state = { filecontent: [] };
+    this.state = { filecontent: [], decodingSection: [] };
   }
+
+  addDecodingSection = () => {
+    this.setState({
+      decodingSection: [
+        ...this.state.decodingSection,
+        { type: "Uint8", startIndex: "0", endIndex: "0" }
+      ]
+    });
+  };
+
+  updateEditedField = i => key => e => {
+    const currentState = this.state;
+    currentState.decodingSection[i][key] = e.target.value;
+
+    this.setState({ ...currentState });
+  };
 
   handleFileRead = () => {
     const typedArray = new Uint8Array(this.fileReader.result);
@@ -40,7 +53,6 @@ class App extends React.Component {
   };
 
   render() {
-    console.log(this.state.filecontent.map(each => each.toString()));
     return (
       <div>
         <input
@@ -58,7 +70,53 @@ class App extends React.Component {
         {this.state.filecontent.map(each => `${each} `)}
 
         {this.state.filecontent.length > 0 && (
-          <button>Add Decoding Section</button>
+          <div>
+            <br />
+            <Button
+              type="primary"
+              icon="poweroff"
+              // loading={this.state.iconLoading}
+              onClick={this.addDecodingSection}
+            >
+              Click me!
+            </Button>
+          </div>
+        )}
+
+        <b>Decoding Section</b>
+
+        {this.state.decodingSection.length > 0 && (
+          <div>
+            {this.state.decodingSection.map((eachSection, index) => {
+              const { type, startIndex, endIndex } = eachSection;
+
+              return (
+                <div key={index}>
+                  <Input
+                    placeholder="Type"
+                    size="large"
+                    value={type || ""}
+                    onChange={this.updateEditedField(index)("type")}
+                  />
+                  <Input
+                    placeholder="Start Index"
+                    size="large"
+                    value={startIndex || ""}
+                    onChange={this.updateEditedField(index)("startIndex")}
+                  />
+                  <Input
+                    placeholder="End Index"
+                    size="large"
+                    value={endIndex || ""}
+                    onChange={this.updateEditedField(index)("endIndex")}
+                  />
+                  {this.state.filecontent
+                    .slice(parseInt(startIndex, 10), parseInt(endIndex, 10))
+                    .map(each => `${each} `)}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     );
