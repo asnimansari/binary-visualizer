@@ -1,11 +1,21 @@
 import React from "react";
-import { Button, Input } from "antd";
+import { Button, Input, Select } from "antd";
+// import "antd/dist/antd.css";
+import { littleEndianFunctionalMap } from "./helpers";
+
+const { Option } = Select;
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.fileReader = null;
-    this.state = { filecontent: [], decodingSection: [] };
+    this.state = {
+      filecontent: [],
+      decodingSection: [
+        { type: "BigUint64", startIndex: "0", endIndex: "0" },
+        { type: "BigUint64", startIndex: "0", endIndex: "0" }
+      ]
+    };
   }
 
   addDecodingSection = () => {
@@ -20,7 +30,11 @@ class App extends React.Component {
   updateEditedField = i => key => e => {
     const currentState = this.state;
     currentState.decodingSection[i][key] = e.target.value;
-
+    this.setState({ ...currentState });
+  };
+  updateSelectField = i => key => value => {
+    const currentState = this.state;
+    currentState.decodingSection[i][key] = value;
     this.setState({ ...currentState });
   };
 
@@ -92,12 +106,18 @@ class App extends React.Component {
 
               return (
                 <div key={index}>
-                  <Input
-                    placeholder="Type"
-                    size="large"
-                    value={type || ""}
-                    onChange={this.updateEditedField(index)("type")}
-                  />
+                  <select
+                    value={type}
+                    onChange={this.updateSelectField(index)("type")}
+                  >
+                    {Object.keys(littleEndianFunctionalMap).map(
+                      eachFunction => (
+                        <option value={`${eachFunction}`}>
+                          {eachFunction}
+                        </option>
+                      )
+                    )}
+                  </select>
                   <Input
                     placeholder="Start Index"
                     size="large"
