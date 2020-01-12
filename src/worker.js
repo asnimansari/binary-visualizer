@@ -5,31 +5,27 @@ export default () => {
 
     const typedArray = new Uint8Array(e.data);
 
-    const untypedArrray = [];
+    postMessage({ typedArray });
+
+    const hexStringArray = [];
+    let completeHexString = "";
     const iii = typedArray.values();
-    let percentLevel = 1;
-    let processLevel = 0;
+
+    let index = 0;
+
     while (true) {
       const { value, done } = iii.next();
-      processLevel = processLevel + 1;
 
       if (done) {
         break;
       }
-
       const hexValue = value.toString(16);
+      hexStringArray.push(hexValue.length === 1 ? `0${hexValue}` : hexValue);
+      completeHexString = completeHexString + hexValue + " ";
 
-      untypedArrray.push(hexValue.length === 1 ? `0${hexValue}` : hexValue);
-
-      if ((processLevel / typedArray.length) * 100 > percentLevel) {
-        postMessage({
-          processLevel: percentLevel,
-          untypedArrray: []
-        });
-        percentLevel = percentLevel + 1;
-      }
+      index = index + 1;
     }
 
-    postMessage({ processLevel: percentLevel, untypedArrray });
+    postMessage({ hexStringArray, completeHexString });
   });
 };

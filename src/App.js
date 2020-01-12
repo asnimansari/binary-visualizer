@@ -1,8 +1,8 @@
 import React from "react";
-import { Button, Input, Select } from "antd";
+import { Button, Col, Input, Row, Select } from "antd";
 import worker from "./worker.js";
 import WebWorker from "./workerSetup";
-// import "antd/dist/antd.css";
+import "antd/dist/antd.css";
 import { littleEndianFunctionalMap } from "./helpers";
 
 const { Option } = Select;
@@ -12,7 +12,8 @@ class App extends React.Component {
     super(props);
     this.fileReader = null;
     this.state = {
-      filecontent: [],
+      hexStringArray: [],
+      completeHexString: "",
       decodingSection: [
         { type: "BigUint64", startIndex: "0", endIndex: "0" },
         { type: "BigUint64", startIndex: "0", endIndex: "0" }
@@ -31,24 +32,20 @@ class App extends React.Component {
 
   updateEditedField = i => key => e => {
     const currentState = this.state;
+
+    console.log(e);
     currentState.decodingSection[i][key] = e.target.value;
     this.setState({ ...currentState });
   };
   updateSelectField = i => key => value => {
     const currentState = this.state;
     currentState.decodingSection[i][key] = value;
+
     this.setState({ ...currentState });
   };
 
   handleFileRead = () => {
     this.worker.postMessage(this.fileReader.result);
-
-    this.worker.addEventListener("message", event => {
-      this.setState({
-        filecontentString: event.data.untypedArrray,
-        processLevel: event.data.processLevel
-      });
-    });
   };
 
   handleFileChosen = file => {
@@ -59,6 +56,12 @@ class App extends React.Component {
 
   componentDidMount() {
     this.worker = new WebWorker(worker);
+    this.worker.addEventListener("message", event => {
+      this.setState({
+        ...this.state,
+        ...event.data
+      });
+    });
   }
 
   render() {
@@ -71,28 +74,17 @@ class App extends React.Component {
           onChange={e => this.handleFileChosen(e.target.files[0])}
         />
         <br />
-        {this.state.filecontent.length > 0 && (
-          <div>No Bytes present {this.state.filecontent.length}</div>
+        {this.state.hexStringArray.length > 0 && (
+          <div>Byte Length {this.state.hexStringArray.length}</div>
         )}
-        {this.state.filecontent.length > 0 && (
-          <div>
-            <br />
-            <Button
-              type="primary"
-              icon="poweroff"
-              // loading={this.state.iconLoading}
-              onClick={this.addDecodingSection}
-            >
-              Click me!
-            </Button>
-          </div>
+
+        {this.state.completeHexString.length > 0 && (
+          <Row>
+            <Row>Content</Row>
+
+            <Row>{this.state.completeHexString}</Row>
+          </Row>
         )}
-        Process Level <br />
-        {this.state.processLevel}
-        <br />
-        Content
-        <br />
-        {this.state.filecontentString}
         <br />
         <b>Decoding Section</b>
         {this.state.decodingSection.length > 0 && (
@@ -101,37 +93,57 @@ class App extends React.Component {
               const { type, startIndex, endIndex } = eachSection;
 
               return (
-                <div key={index}>
-                  <select
-                    value={type}
-                    onChange={this.updateSelectField(index)("type")}
-                  >
-                    {Object.keys(littleEndianFunctionalMap).map(
-                      eachFunction => (
-                        <option value={`${eachFunction}`}>
-                          {eachFunction}
-                        </option>
-                      )
-                    )}
-                  </select>
-                  <Input
-                    placeholder="Start Index"
-                    size="large"
-                    value={startIndex || ""}
-                    onChange={this.updateEditedField(index)("startIndex")}
-                  />
-                  <Input
-                    placeholder="End Index"
-                    size="large"
-                    value={endIndex || ""}
-                    onChange={this.updateEditedField(index)("endIndex")}
-                  />
-                  {this.state.filecontent
-                    .slice(parseInt(startIndex, 10), parseInt(endIndex, 10))
-                    .map(each => `${each} `)}
-                </div>
+                <Row key={index}>
+                  <Col className="gutter-row" span={2}>
+                    <Select
+                      value={type}
+                      onChange={this.updateSelectField(index)("type")}
+                    >
+                      {Object.keys(littleEndianFunctionalMap).map(
+                        eachFunction => (
+                          <Option value={`${eachFunction}`}>
+                            {eachFunction}
+                          </Option>
+                        )
+                      )}
+                    </Select>
+                  </Col>
+                  <Col className="gutter-row" span={6}>
+                    <Input
+                      placeholder="Start Index"
+                      size="large"
+                      value={startIndex || ""}
+                      onChange={this.updateEditedField(index)("startIndex")}
+                    />
+                  </Col>
+                  <Col className="gutter-row" span={6}>
+                    <Input
+                      placeholder="End Index"
+                      size="large"
+                      value={endIndex || ""}
+                      onChange={this.updateEditedField(index)("endIndex")}
+                    />
+                  </Col>
+                  <Col className="gutter-row" span={6}>
+                    {this.state.hexStringArray
+                      .slice(parseInt(startIndex, 10), parseInt(endIndex, 10))
+                      .map(each => `${each} `)}
+                  </Col>
+                </Row>
               );
             })}
+            <Row>
+              <div>
+                <Button
+                  type="primary"
+                  icon="plus"
+                  // loading={this.state.iconLoading}
+                  onClick={this.addDecodingSection}
+                >
+                  Add More Sections
+                </Button>
+              </div>
+            </Row>
           </div>
         )}
       </div>
