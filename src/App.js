@@ -1,5 +1,7 @@
 import React from "react";
 import { Button, Input, Select } from "antd";
+import worker from "./worker.js";
+import WebWorker from "./workerSetup";
 // import "antd/dist/antd.css";
 import { littleEndianFunctionalMap } from "./helpers";
 
@@ -39,24 +41,13 @@ class App extends React.Component {
   };
 
   handleFileRead = () => {
-    const typedArray = new Uint8Array(this.fileReader.result);
-    const untypedArrray = [];
-    const iii = typedArray.values();
+    this.worker.postMessage(this.fileReader.result);
 
-    while (true) {
-      const { value, done } = iii.next();
-
-      if (done) {
-        break;
-      }
-
-      const hexValue = value.toString(16);
-
-      untypedArrray.push(hexValue.length === 1 ? `0${hexValue}` : hexValue);
-    }
-
-    this.setState({
-      filecontent: untypedArrray
+    this.worker.addEventListener("message", event => {
+      this.setState({
+        filecontentString: event.data.untypedArrray,
+        processLevel: event.data.processLevel
+      });
     });
   };
 
@@ -66,23 +57,23 @@ class App extends React.Component {
     this.fileReader.readAsArrayBuffer(file);
   };
 
+  componentDidMount() {
+    this.worker = new WebWorker(worker);
+  }
+
   render() {
+    console.log("Re Render");
     return (
       <div>
         <input
           type={"file"}
           id={"file"}
-          accept={".bin"}
           onChange={e => this.handleFileChosen(e.target.files[0])}
         />
         <br />
-
         {this.state.filecontent.length > 0 && (
           <div>No Bytes present {this.state.filecontent.length}</div>
         )}
-
-        {this.state.filecontent.map(each => `${each} `)}
-
         {this.state.filecontent.length > 0 && (
           <div>
             <br />
@@ -96,9 +87,14 @@ class App extends React.Component {
             </Button>
           </div>
         )}
-
+        Process Level <br />
+        {this.state.processLevel}
+        <br />
+        Content
+        <br />
+        {this.state.filecontentString}
+        <br />
         <b>Decoding Section</b>
-
         {this.state.decodingSection.length > 0 && (
           <div>
             {this.state.decodingSection.map((eachSection, index) => {
