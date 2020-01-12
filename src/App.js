@@ -3,7 +3,7 @@ import { Button, Col, Input, Row, Select } from "antd";
 import worker from "./worker.js";
 import WebWorker from "./workerSetup";
 import "antd/dist/antd.css";
-import { littleEndianFunctionalMap } from "./helpers";
+import { dataTypes, processDataAsPerType } from "./helpers";
 
 const { Option } = Select;
 
@@ -14,9 +14,10 @@ class App extends React.Component {
     this.state = {
       hexStringArray: [],
       completeHexString: "",
+      typedArray: new Uint8Array(0),
       decodingSection: [
-        { type: "BigUint64", startIndex: "0", endIndex: "0" },
-        { type: "BigUint64", startIndex: "0", endIndex: "0" }
+        { type: "Choose Type", startIndex: "0", endIndex: "0" },
+        { type: "Choose Type", startIndex: "0", endIndex: "0" }
       ]
     };
   }
@@ -99,16 +100,14 @@ class App extends React.Component {
                       value={type}
                       onChange={this.updateSelectField(index)("type")}
                     >
-                      {Object.keys(littleEndianFunctionalMap).map(
-                        eachFunction => (
-                          <Option value={`${eachFunction}`}>
-                            {eachFunction}
-                          </Option>
-                        )
-                      )}
+                      {dataTypes.map(eachFunction => (
+                        <Option value={`${eachFunction}`}>
+                          {eachFunction}
+                        </Option>
+                      ))}
                     </Select>
                   </Col>
-                  <Col className="gutter-row" span={6}>
+                  <Col className="gutter-row" span={2}>
                     <Input
                       placeholder="Start Index"
                       size="large"
@@ -116,7 +115,7 @@ class App extends React.Component {
                       onChange={this.updateEditedField(index)("startIndex")}
                     />
                   </Col>
-                  <Col className="gutter-row" span={6}>
+                  <Col className="gutter-row" span={2}>
                     <Input
                       placeholder="End Index"
                       size="large"
@@ -128,6 +127,15 @@ class App extends React.Component {
                     {this.state.hexStringArray
                       .slice(parseInt(startIndex, 10), parseInt(endIndex, 10))
                       .map(each => `${each} `)}
+                  </Col>
+                  <Col className="gutter-row" span={6}>
+                    {processDataAsPerType(
+                      this.state.typedArray.slice(
+                        parseInt(startIndex, 10),
+                        parseInt(endIndex, 10)
+                      ).buffer,
+                      type
+                    )}
                   </Col>
                 </Row>
               );

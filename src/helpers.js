@@ -33,7 +33,7 @@ function getUint8(binaryArrayBuffer) {
 // TODO Impliment Uint64
 // Refer https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView
 
-export const littleEndianFunctionalMap = {
+const littleEndianFunctionalMap = {
   BigInt64: getBigInt64,
   BigUint64: getBigUint64,
   Float32: getFloat32,
@@ -41,8 +41,20 @@ export const littleEndianFunctionalMap = {
   Int16: getInt16,
   Uint16: getUint16,
   Uint32: getUint32,
-  Uint8: getUint8
+  Uint8: getUint8,
+  "Choose Type": () => ""
 };
+
+export function processDataAsPerType(data, type) {
+  console.log(data);
+  try {
+    return littleEndianFunctionalMap[type](data);
+  } catch (e) {
+    return "Invalid Value: error " + e.toString();
+  }
+}
+
+export const dataTypes = Object.keys(littleEndianFunctionalMap);
 
 export const lengthValidators = {
   BigInt64: buffer => buffer.length === 8,
